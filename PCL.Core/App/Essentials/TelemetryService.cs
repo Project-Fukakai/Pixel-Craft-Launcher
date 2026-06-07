@@ -23,13 +23,18 @@ namespace PCL.Core.App.Essentials;
 [LifecycleService(LifecycleState.Running)]
 public sealed partial class TelemetryService
 {
+    private static bool _isSentryInitialized;
+
     private static void _InitSentry()
     {
-        Context.Info("开始初始化 Sentry SDK");
+        if (!Config.System.Telemetry || _isSentryInitialized)
+            return;
+
+        LogWrapper.Info("Telemetry", "开始初始化 Sentry SDK");
         var dsn = EnvironmentInterop.GetSecret("SENTRY_DSN");
         if (dsn is null)
         {
-            Context.Warn("未找到 Sentry DSN");
+            LogWrapper.Warn("Telemetry", "未找到 Sentry DSN");
             return;
         }
         
@@ -77,13 +82,39 @@ public sealed partial class TelemetryService
                 Id = Utils.Secret.Identify.LauncherId
             };
         });
+        _isSentryInitialized = true;
         
-        Context.Info("Sentry SDK 初始化完成");
+        LogWrapper.Info("Telemetry", "Sentry SDK 初始化完成");
+    }
+
+    public static void ApplyTelemetrySetting()
+    {
+        if (Config.System.Telemetry)
+        {
+            _InitSentry();
+            return;
+        }
+
+        if (!_isSentryInitialized)
+            return;
+
+        try
+        {
+            SentrySdk.FlushAsync(TimeSpan.FromSeconds(2)).GetAwaiter().GetResult();
+            SentrySdk.Close();
+        }
+        finally
+        {
+            _isSentryInitialized = false;
+        }
     }
 
     // 错误上报
     public static void ReportException(Exception ex, string plain, LogLevel level)
     {
+        if (!Config.System.Telemetry || !_isSentryInitialized)
+            return;
+
         var sentryEvent = new SentryEvent(ex)
         {
             Level = level.RealLevel() switch

@@ -1,0 +1,17 @@
+{
+  "name": "Pixel Craft Launcher",
+  "version": {
+    "base": "0.1.0",
+    "upstream": "2.14.6",
+    "suffix": "dev",
+    "code": 1
+  },
+  "licenses": [
+    { 
+      "name": "PCL.Core",
+      "info": "来自 PCL CE 的启动器核心",
+      "website": "https://github.com/PCL-Community/PCL2-CE/tree/dev/PCL.Core",
+      "license": "https://github.com/PCL-Community/PCL2-CE/blob/dev/LICENSE"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <OutputType>Library</OutputType>
     <LangVersion>14.0</LangVersion>
     <Nullable>enable</Nullable>
@@ -13,8 +13,6 @@
     <Copyright>Copyright © PCL Community 2025</Copyright>
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <FileVersion>1.0.0.0</FileVersion>
-    <EnableWindowsTargeting>true</EnableWindowsTargeting>
-    <UseWPF>true</UseWPF>
   </PropertyGroup>
   <PropertyGroup>
     <DebugSymbols>true</DebugSymbols>
@@ -53,6 +51,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="Net\**" />
+    <Compile Remove="BlurPerformanceTest.cs" />
+    <Compile Remove="Support\OptimizedBlurEffectShim.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Remove="Net\**" />

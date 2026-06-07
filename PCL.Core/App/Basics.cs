@@ -21,8 +21,7 @@ public static class Basics
     /// <summary>
     /// 启动器元数据。
     /// </summary>
-    public static MetadataModel Metadata { get; } = JsonSerializer.Deserialize<MetadataModel>(
-        Assembly.GetEntryAssembly()!.GetManifestResourceStream("PCL.metadata.json")!)!;
+    public static MetadataModel Metadata { get; } = LoadMetadata();
 
     /// <summary>
     /// 版本名称。
@@ -38,6 +37,20 @@ public static class Basics
     /// 版本分支名。
     /// </summary>
     public static string VersionBranch => Metadata.Version.BranchName;
+
+    private static MetadataModel LoadMetadata()
+    {
+        var entryAssembly = Assembly.GetEntryAssembly();
+        using var stream = entryAssembly?.GetManifestResourceStream("PCL.metadata.json") ??
+                           typeof(Basics).Assembly.GetManifestResourceStream("PCL.metadata.json");
+        if (stream is not null)
+            return JsonSerializer.Deserialize<MetadataModel>(stream)!;
+
+        return new MetadataModel(
+            "PCL.Core",
+            new LauncherVersionModel("0.0.0", "test", 0, "0.0.0"),
+            []);
+    }
 
     /// <summary>
     /// 当前日期是否为愚人节。

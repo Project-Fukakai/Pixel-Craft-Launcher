@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Pixel_Craft_Launcher.App"
              xmlns:local="using:Pixel_Craft_Launcher"
+             Name="Pixel Craft Launcher"
              RequestedThemeVariant="Default">
     
     <Application.Resources>
@@ -9,6 +10,95 @@
             <!--TODO Markdown-->
             <x:Double x:Key="BlurRadius">0.0</x:Double>
             <x:Double x:Key="BlurSamplingRate">0.7</x:Double>
+            <Color x:Key="PixelColorPrimary">#1370f3</Color>
+            <Color x:Key="PixelColorPrimaryHover">#0b5bcb</Color>
+            <Color x:Key="PixelColorPrimaryContainer">#d5e6fd</Color>
+            <Color x:Key="PixelColorOnPrimaryContainer">#001b3d</Color>
+            <Color x:Key="PixelColorOnPrimary">#ffffff</Color>
+            <Color x:Key="PixelColorText">#343d4a</Color>
+            <Color x:Key="PixelColorTextSecondary">#737373</Color>
+            <Color x:Key="PixelColorTextDisabled">#a6a6a6</Color>
+            <Color x:Key="PixelColorBackground">#fbfbfb</Color>
+            <Color x:Key="PixelColorTransparentBackground">#d2fbfbfb</Color>
+            <Color x:Key="PixelColorSurface">#ffffff</Color>
+            <Color x:Key="PixelColorSurfaceVariant">#eaf2fe</Color>
+            <Color x:Key="PixelColorCardBackground">#d2fbfbfb</Color>
+            <Color x:Key="PixelColorContainer">#f5f5f5</Color>
+            <Color x:Key="PixelColorContainerHigh">#f0f0f0</Color>
+            <Color x:Key="PixelColorBorder">#d5e6fd</Color>
+            <Color x:Key="PixelColorBorderStrong">#cccccc</Color>
+            <Color x:Key="PixelColorSidebarBackground">#ffffff</Color>
+            <Color x:Key="PixelColorSidebarBorder">#d5e6fd</Color>
+            <Color x:Key="PixelColorShellBackground">#f5f9ff</Color>
+            <Color x:Key="PixelColorInputBackground">#ffffff</Color>
+            <Color x:Key="PixelColorInputHoverBackground">#e0eafd</Color>
+            <Color x:Key="PixelColorInputBorder">#d5e6fd</Color>
+            <Color x:Key="PixelColorInputDisabledBackground">#ebebeb</Color>
+            <Color x:Key="PixelColorSliderTrack">#e0eafd</Color>
+            <Color x:Key="PixelColorListItemHover">#e0eafd</Color>
+            <Color x:Key="PixelColorButtonHoverBackground">#e0eafd</Color>
+            <Color x:Key="PixelColorButtonDangerHoverBackground">#80fbdddd</Color>
+            <Color x:Key="PixelColorOverlay">#66000000</Color>
+            <Color x:Key="PixelColorHalfWhite">#55ffffff</Color>
+            <Color x:Key="PixelColorWhite">#ffffff</Color>
+            <Color x:Key="PixelColorTransparent">#00ffffff</Color>
+            <Color x:Key="PixelColorError">#ce2111</Color>
+            <Color x:Key="PixelColorErrorContainer">#80fbdddd</Color>
+            <Color x:Key="PixelColorOnErrorContainer">#4f0000</Color>
+            <Color x:Key="PixelColorWarning">#9b6400</Color>
+            <Color x:Key="PixelColorWarningContainer">#fff1bf</Color>
+            <Color x:Key="PixelColorSuccess">#218e21</Color>
+            <Color x:Key="PixelColorSuccessContainer">#d7f5d7</Color>
+            <Color x:Key="PixelColorInfo">#1370f3</Color>
+            <Color x:Key="PixelColorInfoContainer">#d5e6fd</Color>
+            <Color x:Key="PixelColorShadow">#201f2d40</Color>
+            <Color x:Key="PixelColorMemoryUsed">#0b5bcb</Color>
+            <Color x:Key="PixelColorMemoryGame">#1370f3</Color>
+            <Color x:Key="PixelColorMemoryFree">#d5e6fd</Color>
+            <SolidColorBrush x:Key="PixelBrushPrimary" Color="{DynamicResource PixelColorPrimary}" />
+            <SolidColorBrush x:Key="PixelBrushPrimaryHover" Color="{DynamicResource PixelColorPrimaryHover}" />
+            <SolidColorBrush x:Key="PixelBrushPrimaryContainer" Color="{DynamicResource PixelColorPrimaryContainer}" />
+            <SolidColorBrush x:Key="PixelBrushOnPrimaryContainer" Color="{DynamicResource PixelColorOnPrimaryContainer}" />
+            <SolidColorBrush x:Key="PixelBrushOnPrimary" Color="{DynamicResource PixelColorOnPrimary}" />
+            <SolidColorBrush x:Key="PixelBrushText" Color="{DynamicResource PixelColorText}" />
+            <SolidColorBrush x:Key="PixelBrushTextSecondary" Color="{DynamicResource PixelColorTextSecondary}" />
+            <SolidColorBrush x:Key="PixelBrushTextDisabled" Color="{DynamicResource PixelColorTextDisabled}" />
+            <SolidColorBrush x:Key="PixelBrushBackground" Color="{DynamicResource PixelColorBackground}" />
+            <SolidColorBrush x:Key="PixelBrushTransparentBackground" Color="{DynamicResource PixelColorTransparentBackground}" />
+            <SolidColorBrush x:Key="PixelBrushSurface" Color="{DynamicResource PixelColorSurface}" />
+            <SolidColorBrush x:Key="PixelBrushSurfaceVariant" Color="{DynamicResource PixelColorSurfaceVariant}" />
+            <SolidColorBrush x:Key="PixelBrushCardBackground" Color="{DynamicResource PixelColorCardBackground}" />
+            <SolidColorBrush x:Key="PixelBrushContainer" Color="{DynamicResource PixelColorContainer}" />
+            <SolidColorBrush x:Key="PixelBrushContainerHigh" Color="{DynamicResource PixelColorContainerHigh}" />
+            <SolidColorBrush x:Key="PixelBrushBorder" Color="{DynamicResource PixelColorBorder}" />
+            <SolidColorBrush x:Key="PixelBrushBorderStrong" Color="{DynamicResource PixelColorBorderStrong}" />
+            <SolidColorBrush x:Key="PixelBrushSidebarBackground" Color="{DynamicResource PixelColorSidebarBackground}" />
+            <SolidColorBrush x:Key="PixelBrushSidebarBorder" Color="{DynamicResource PixelColorSidebarBorder}" />
+            <SolidColorBrush x:Key="PixelBrushShellBackground" Color="{DynamicResource PixelColorShellBackground}" />
+            <SolidColorBrush x:Key="PixelBrushInputBackground" Color="{DynamicResource PixelColorInputBackground}" />
+            <SolidColorBrush x:Key="PixelBrushInputHoverBackground" Color="{DynamicResource PixelColorInputHoverBackground}" />
+            <SolidColorBrush x:Key="PixelBrushInputBorder" Color="{DynamicResource PixelColorInputBorder}" />
+            <SolidColorBrush x:Key="PixelBrushInputDisabledBackground" Color="{DynamicResource PixelColorInputDisabledBackground}" />
+            <SolidColorBrush x:Key="PixelBrushSliderTrack" Color="{DynamicResource PixelColorSliderTrack}" />
+            <SolidColorBrush x:Key="PixelBrushListItemHover" Color="{DynamicResource PixelColorListItemHover}" />
+            <SolidColorBrush x:Key="PixelBrushButtonHoverBackground" Color="{DynamicResource PixelColorButtonHoverBackground}" />
+            <SolidColorBrush x:Key="PixelBrushButtonDangerHoverBackground" Color="{DynamicResource PixelColorButtonDangerHoverBackground}" />
+            <SolidColorBrush x:Key="PixelBrushOverlay" Color="{DynamicResource PixelColorOverlay}" />
+            <SolidColorBrush x:Key="PixelBrushHalfWhite" Color="{DynamicResource PixelColorHalfWhite}" />
+            <SolidColorBrush x:Key="PixelBrushWhite" Color="{DynamicResource PixelColorWhite}" />
+            <SolidColorBrush x:Key="PixelBrushTransparent" Color="{DynamicResource PixelColorTransparent}" />
+            <SolidColorBrush x:Key="PixelBrushError" Color="{DynamicResource PixelColorError}" />
+            <SolidColorBrush x:Key="PixelBrushErrorContainer" Color="{DynamicResource PixelColorErrorContainer}" />
+            <SolidColorBrush x:Key="PixelBrushOnErrorContainer" Color="{DynamicResource PixelColorOnErrorContainer}" />
+            <SolidColorBrush x:Key="PixelBrushWarning" Color="{DynamicResource PixelColorWarning}" />
+            <SolidColorBrush x:Key="PixelBrushWarningContainer" Color="{DynamicResource PixelColorWarningContainer}" />
+            <SolidColorBrush x:Key="PixelBrushSuccess" Color="{DynamicResource PixelColorSuccess}" />
+            <SolidColorBrush x:Key="PixelBrushSuccessContainer" Color="{DynamicResource PixelColorSuccessContainer}" />
+            <SolidColorBrush x:Key="PixelBrushInfo" Color="{DynamicResource PixelColorInfo}" />
+            <SolidColorBrush x:Key="PixelBrushInfoContainer" Color="{DynamicResource PixelColorInfoContainer}" />
+            <SolidColorBrush x:Key="PixelBrushMemoryUsed" Color="{DynamicResource PixelColorMemoryUsed}" />
+            <SolidColorBrush x:Key="PixelBrushMemoryGame" Color="{DynamicResource PixelColorMemoryGame}" />
+            <SolidColorBrush x:Key="PixelBrushMemoryFree" Color="{DynamicResource PixelColorMemoryFree}" />
         </ResourceDictionary>
     </Application.Resources>
     
@@ -18,5 +108,7 @@
   
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="/Resource/Styles/MyButton.axaml" />
+        <StyleInclude Source="/Resource/Styles/MyFormControls.axaml" />
     </Application.Styles>
 </Application>

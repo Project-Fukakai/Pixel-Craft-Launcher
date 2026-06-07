@@ -31,6 +31,17 @@ public enum ColorTheme
 }
 
 /// <summary>
+/// 配色方案来源。
+/// </summary>
+public enum ColorSchemeMode
+{
+    Preset = 0,
+    Manual = 1,
+    Image = 2,
+    AutoBackground = 3
+}
+
+/// <summary>
 /// 更新通道
 /// </summary>
 public enum UpdateChannel

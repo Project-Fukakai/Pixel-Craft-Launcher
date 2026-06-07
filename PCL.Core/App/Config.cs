@@ -197,6 +197,11 @@ public static partial class Config
         [ConfigItem<bool>("UiShowLaunchingHint", true, ConfigSource.Local)] public partial bool ShowLaunchingHint { get; set; }
 
         /// <summary>
+        /// 启用亚克力材质。
+        /// </summary>
+        [ConfigItem<bool>("UiAcrylic", false, ConfigSource.Local)] public partial bool EnableAcrylic { get; set; }
+
+        /// <summary>
         /// 标题内容类型。
         /// </summary>
         [ConfigItem<LauncherTitleType>("UiLogoType", LauncherTitleType.Default, ConfigSource.Local)] public partial LauncherTitleType WindowTitleType { get; set; }
@@ -247,6 +252,26 @@ public static partial class Config
             [ConfigItem<ColorTheme>("UiLightColor", ColorTheme.CatBlue)] public partial ColorTheme LightColor { get; set; }
 
             /// <summary>
+            /// 配色方案来源。
+            /// </summary>
+            [ConfigItem<ColorSchemeMode>("UiColorSchemeMode", ColorSchemeMode.Preset, ConfigSource.Local)] public partial ColorSchemeMode ColorSchemeMode { get; set; }
+
+            /// <summary>
+            /// 配色方案种子色。
+            /// </summary>
+            [ConfigItem<string>("UiColorSchemeSeed", "", ConfigSource.Local)] public partial string ColorSchemeSeed { get; set; }
+
+            /// <summary>
+            /// 配色方案取色图片。
+            /// </summary>
+            [ConfigItem<string>("UiColorSchemeImage", "", ConfigSource.Local)] public partial string ColorSchemeImage { get; set; }
+
+            /// <summary>
+            /// 是否自动使用背景图片取色。
+            /// </summary>
+            [ConfigItem<bool>("UiColorSchemeAutoBackground", false, ConfigSource.Local)] public partial bool ColorSchemeAutoBackground { get; set; }
+
+            /// <summary>
             /// 窗口透明度。
             /// </summary>
             [ConfigItem<int>("UiLauncherTransparent", 600, ConfigSource.Local)] public partial int WindowOpacity { get; set; }
@@ -283,6 +308,11 @@ public static partial class Config
         [ConfigGroup("Background")] partial class BackgroundConfigGroup
         {
             /// <summary>
+            /// 背景目录。
+            /// </summary>
+            [ConfigItem<string>("UiBackgroundFolder", "", ConfigSource.Local)] public partial string Folder { get; set; }
+
+            /// <summary>
             /// 彩色底部填充。
             /// </summary>
             [ConfigItem<bool>("UiBackgroundColorful", true, ConfigSource.Local)] public partial bool BackgroundColorful { get; set; }
@@ -311,32 +341,6 @@ public static partial class Config
             /// 视频自动暂停。
             /// </summary>
             [ConfigItem<bool>("UiAutoPauseVideo", true, ConfigSource.Local)] public partial bool AutoPauseVideo { get; set; }
-        }
-
-        /// <summary>
-        /// 高级材质。
-        /// </summary>
-        [ConfigGroup("Blur")] partial class BlurConfigGroup
-        {
-            /// <summary>
-            /// 是否启用。
-            /// </summary>
-            [ConfigItem<bool>("UiBlur", false, ConfigSource.Local)] public partial bool IsEnabled { get; set; }
-
-            /// <summary>
-            /// 模糊半径。
-            /// </summary>
-            [ConfigItem<int>("UiBlurValue", 16, ConfigSource.Local)] public partial int Radius { get; set; }
-
-            /// <summary>
-            /// 采样率。
-            /// </summary>
-            [ConfigItem<int>("UiBlurSamplingRate", 70, ConfigSource.Local)] public partial int SamplingRate { get; set; }
-
-            /// <summary>
-            /// 模糊方法。
-            /// </summary>
-            [ConfigItem<int>("UiBlurType", 0, ConfigSource.Local)] public partial int KernelType { get; set; }
         }
 
         /// <summary>

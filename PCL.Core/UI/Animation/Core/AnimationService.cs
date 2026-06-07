@@ -95,7 +95,7 @@ public sealed class AnimationService : GeneralService
         });
 
         // 初始化 Clock 并注册 Tick 事件
-        _clock = new WinMMClock(Fps);
+        _clock = OperatingSystem.IsWindows() ? new WinMMClock(Fps) : new StopwatchClock(Fps);
         _clock.Tick += ClockOnTick;
         _clock.Start();
         
@@ -104,6 +104,20 @@ public sealed class AnimationService : GeneralService
         {
             _ = Task.Run(_AnimationComputeTaskAsync);
         }
+    }
+
+    public static void SetFps(int fps)
+    {
+        Fps = Math.Clamp(fps, 1, 240);
+        if (_clock is null)
+            return;
+
+        var wasRunning = _clock.IsRunning;
+        if (wasRunning)
+            _clock.Stop();
+        _clock.Fps = Fps;
+        if (wasRunning)
+            _clock.Start();
     }
 
     private static void _Uninitialize()

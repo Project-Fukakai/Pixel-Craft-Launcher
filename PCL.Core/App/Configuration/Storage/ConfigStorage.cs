@@ -22,6 +22,8 @@ public enum StorageAction
 /// </summary>
 public abstract class ConfigStorage : IConfigProvider
 {
+    internal static bool ThrowOnAccessError { get; set; }
+
     protected abstract bool OnAccess<TKey, TValue>(
         StorageAction action,
         ref TKey key,
@@ -63,6 +65,7 @@ public abstract class ConfigStorage : IConfigProvider
         }
         catch (Exception ex)
         {
+            if (ThrowOnAccessError) throw;
             var msg = $"Config Storage Error Report\n" +
                 $"A exception was thrown while processing an access.\n\n" +
                 $"[Diagnostics Info]\n{_GenerateDiagnosticsInfo(action, key, value, hasOutput, argument, true)}\n\n" +

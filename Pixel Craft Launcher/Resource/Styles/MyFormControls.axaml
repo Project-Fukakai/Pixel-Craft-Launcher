@@ -1,0 +1,181 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="using:Pixel_Craft_Launcher.Controls">
+    <Style Selector="TextBox">
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="MinWidth" Value="120" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="8,5" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Background" Value="{DynamicResource PixelBrushInputBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PixelBrushInputBorder}" />
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushText}" />
+        <Setter Property="PlaceholderForeground" Value="{DynamicResource PixelBrushTextSecondary}" />
+        <Setter Property="CaretBrush" Value="{DynamicResource PixelBrushPrimary}" />
+        <Setter Property="SelectionBrush" Value="{DynamicResource PixelBrushPrimaryContainer}" />
+        <Setter Property="SelectionForegroundBrush" Value="{DynamicResource PixelBrushText}" />
+    </Style>
+    <Style Selector="TextBox:pointerover">
+        <Setter Property="Background" Value="{DynamicResource PixelBrushInputHoverBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PixelBrushPrimary}" />
+    </Style>
+    <Style Selector="TextBox:focus">
+        <Setter Property="Background" Value="{DynamicResource PixelBrushInputHoverBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PixelBrushPrimaryHover}" />
+    </Style>
+    <Style Selector="TextBox:disabled">
+        <Setter Property="Background" Value="{DynamicResource PixelBrushInputDisabledBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PixelBrushInputBorder}" />
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushTextDisabled}" />
+        <Setter Property="PlaceholderForeground" Value="{DynamicResource PixelBrushTextDisabled}" />
+    </Style>
+    <Style Selector="TextBox:invalid">
+        <Setter Property="Background" Value="{DynamicResource PixelBrushErrorContainer}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PixelBrushError}" />
+    </Style>
+
+    <Style Selector="ComboBox">
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="MinWidth" Value="120" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="MaxDropDownHeight" Value="160" />
+        <Setter Property="Background" Value="{DynamicResource PixelBrushInputBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PixelBrushInputBorder}" />
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushText}" />
+        <Setter Property="PlaceholderForeground" Value="{DynamicResource PixelBrushTextSecondary}" />
+    </Style>
+    <Style Selector="ComboBox:pointerover">
+        <Setter Property="Background" Value="{DynamicResource PixelBrushInputHoverBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PixelBrushPrimary}" />
+    </Style>
+    <Style Selector="ComboBox:focus">
+        <Setter Property="Background" Value="{DynamicResource PixelBrushInputHoverBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PixelBrushPrimaryHover}" />
+    </Style>
+    <Style Selector="ComboBox:disabled">
+        <Setter Property="Background" Value="{DynamicResource PixelBrushInputDisabledBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource PixelBrushInputBorder}" />
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushTextDisabled}" />
+        <Setter Property="PlaceholderForeground" Value="{DynamicResource PixelBrushTextDisabled}" />
+    </Style>
+
+    <Style Selector="ComboBoxItem">
+        <Setter Property="MinHeight" Value="26" />
+        <Setter Property="Padding" Value="8,5" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushText}" />
+    </Style>
+    <Style Selector="ComboBoxItem:pointerover">
+        <Setter Property="Background" Value="{DynamicResource PixelBrushListItemHover}" />
+    </Style>
+    <Style Selector="ComboBoxItem:selected">
+        <Setter Property="Background" Value="{DynamicResource PixelBrushPrimaryContainer}" />
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushOnPrimaryContainer}" />
+    </Style>
+
+    <Style Selector="CheckBox">
+        <Setter Property="MinHeight" Value="20" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushText}" />
+    </Style>
+    <Style Selector="CheckBox:pointerover">
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushPrimary}" />
+    </Style>
+    <Style Selector="CheckBox:checked">
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushPrimaryHover}" />
+    </Style>
+    <Style Selector="CheckBox:disabled">
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushTextDisabled}" />
+    </Style>
+
+    <Style Selector="RadioButton">
+        <Setter Property="MinHeight" Value="20" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushText}" />
+    </Style>
+    <Style Selector="RadioButton:pointerover">
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushPrimary}" />
+    </Style>
+    <Style Selector="RadioButton:checked">
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushPrimaryHover}" />
+    </Style>
+    <Style Selector="RadioButton:disabled">
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushTextDisabled}" />
+    </Style>
+
+    <Style Selector="controls|MyRadioButton">
+        <Setter Property="MinHeight" Value="27" />
+        <Setter Property="MaxHeight" Value="27" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="CornerRadius" Value="13.5" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushOnPrimaryContainer}" />
+    </Style>
+
+    <Style Selector="controls|MyCheckBox">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  Margin="{TemplateBinding Padding}"
+                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="controls|MyRadioBox">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <ContentPresenter Content="{TemplateBinding Content}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  Margin="{TemplateBinding Padding}"
+                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="controls|MyRadioButton">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}"
+                        CornerRadius="{TemplateBinding CornerRadius}">
+                    <ContentPresenter Content="{TemplateBinding Content}"
+                                      ContentTemplate="{TemplateBinding ContentTemplate}"
+                                      Margin="{TemplateBinding Padding}"
+                                      HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <Style Selector="controls|MySlider">
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="MinWidth" Value="120" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushPrimary}" />
+    </Style>
+    <Style Selector="controls|MySlider:pointerover">
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushPrimaryHover}" />
+    </Style>
+    <Style Selector="controls|MySlider:disabled">
+        <Setter Property="Foreground" Value="{DynamicResource PixelBrushTextDisabled}" />
+        <Setter Property="Opacity" Value="0.65" />
+    </Style>
+</Styles>

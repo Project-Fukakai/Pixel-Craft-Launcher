@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using PCL.Core.App.Configuration;
 using Logging;
 
 public static class Directories {
@@ -195,6 +196,7 @@ public static class Directories {
         if (string.IsNullOrEmpty(toPath)) {
             throw new ArgumentNullException(nameof(toPath), "目标文件夹路径为空");
         }
+        if (DebugSettingsService.ShouldSkipCopy(fromPath, toPath)) return;
 
         // 规范化路径
         fromPath = Path.GetFullPath(fromPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;

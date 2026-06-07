@@ -1,20 +1,240 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:Pixel_Craft_Launcher.ViewModels"
+        xmlns:controls="using:Pixel_Craft_Launcher.Controls"
+        xmlns:platform="using:Pixel_Craft_Launcher.Controls.Platform"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        mc:Ignorable="d" d:DesignWidth="980" d:DesignHeight="620"
         x:Class="Pixel_Craft_Launcher.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="Pixel_Craft_Launcher">
+        Title="Pixel Craft Launcher"
+        Width="980"
+        Height="620"
+        MinWidth="810"
+        MinHeight="500"
+        Background="{DynamicResource PixelBrushShellBackground}"
+        TransparencyLevelHint="None"
+        TransparencyBackgroundFallback="{DynamicResource PixelBrushShellBackground}"
+        ExtendClientAreaToDecorationsHint="True"
+        platform:MacOSTitleBar.IsThick="True"
+        >
 
     <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Grid x:Name="RootLayout" RowDefinitions="48,*">
+        <Grid x:Name="PersonalizationBackgroundHost"
+              Grid.RowSpan="2"
+              ClipToBounds="True"
+              IsHitTestVisible="False">
+            <ContentControl x:Name="BackgroundMediaHost"
+                            HorizontalContentAlignment="Stretch"
+                            VerticalContentAlignment="Stretch"/>
+            <Border x:Name="BackgroundColorOverlay"
+                    Background="{DynamicResource PixelBrushShellBackground}"/>
+        </Grid>
+        <controls:AnimatedBackgroundGrid x:Name="PanTitle"
+                                         Grid.Row="0"
+                                         BackgroundBrush="{DynamicResource PixelBrushPrimaryContainer}"
+                                         PointerPressed="PanTitle_OnPointerPressed">
+            <Grid ColumnDefinitions="*,Auto,*">
+                <StackPanel x:Name="PanTitleLeft"
+                            Orientation="Horizontal"
+                            Spacing="10"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Left"
+                            Margin="16,0,0,0">
+                    <Path x:Name="PathTitleLogo"
+                          Width="40"
+                          Height="20"
+                          Stretch="Uniform"
+                          Stroke="{DynamicResource PixelBrushOnPrimaryContainer}"
+                          StrokeThickness="2.2"
+                          Data="M26,29 v-25 h6 a7,7 180 0 1 0,14 h-6 M62.5,6.5 a10,11.5 180 1 0 0,18 M71,2.5 v24.5 h13.5"/>
+                    <Image x:Name="ImgTitleLogo"
+                           Width="40"
+                           Height="24"
+                           Stretch="Uniform"
+                           IsVisible="False"/>
+                    <TextBlock x:Name="LabTitleBrand"
+                               Text=""
+                               Foreground="{DynamicResource PixelBrushOnPrimaryContainer}"
+                               FontSize="17"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
 
+                <StackPanel x:Name="PanTitleNav"
+                            Grid.Column="1"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Spacing="0"
+                            Margin="13,0">
+                    <controls:MyRadioButton x:Name="BtnLaunch"
+                                            Text="启动"
+                                            Margin="5,0"
+                                            Padding="2,0"
+                                            Checked="True"
+                                            LogoScale="0.9"
+                                            Icon="mdi-play"/>
+                    <controls:MyRadioButton x:Name="BtnDownload"
+                                            Text="下载"
+                                            Margin="5,0"
+                                            Padding="2,0"
+                                            LogoScale="0.9"
+                                            Icon="mdi-download"/>
+                    <controls:MyRadioButton x:Name="BtnSetup"
+                                            Text="设置"
+                                            Margin="5,0"
+                                            Padding="2,0"
+                                            LogoScale="1"
+                                            Icon="mdi-cog"/>
+                    <controls:MyRadioButton x:Name="BtnTools"
+                                            Text="工具"
+                                            Margin="5,0"
+                                            Padding="2,0"
+                                            LogoScale="1"
+                                            Icon="mdi-tools"/>
+                </StackPanel>
+
+                <StackPanel x:Name="PanTitleSecondary"
+                            Grid.Column="0"
+                            Orientation="Horizontal"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Center"
+                            Spacing="8"
+                            Margin="16,0,0,0"
+                            IsVisible="False">
+                    <controls:MyIconButton x:Name="BtnTitleBack"
+                                           Width="30"
+                                           Height="30"
+                                           Padding="6"
+                                           IconSize="18"
+                                           Foreground="{DynamicResource PixelBrushOnPrimaryContainer}"
+                                           Icon="mdi-arrow-left"/>
+                    <TextBlock x:Name="LabTitleSecondary"
+                               Text=""
+                               Foreground="{DynamicResource PixelBrushOnPrimaryContainer}"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Right"
+                            Spacing="4"
+                            Margin="0,0,8,0">
+                    <controls:MyIconButton x:Name="BtnTitleHelp"
+                                           Width="28"
+                                           Height="28"
+                                           Foreground="{DynamicResource PixelBrushOnPrimaryContainer}"
+                                           IsVisible="False"
+                                           Icon="mdi-help-circle-outline"/>
+                    <controls:MyIconButton x:Name="BtnTitleMin"
+                                           Width="28"
+                                           Height="28"
+                                           Foreground="{DynamicResource PixelBrushOnPrimaryContainer}"
+                                           Click="BtnTitleMin_OnClick"
+                                           Icon="mdi-window-minimize"/>
+                    <controls:MyIconButton x:Name="BtnTitleClose"
+                                           Width="28"
+                                           Height="28"
+                                           Foreground="{DynamicResource PixelBrushOnPrimaryContainer}"
+                                           Click="BtnTitleClose_OnClick"
+                                           Icon="mdi-close"/>
+                </StackPanel>
+            </Grid>
+        </controls:AnimatedBackgroundGrid>
+
+        <Grid Grid.Row="1">
+            <Grid ColumnDefinitions="Auto,*">
+                <Border x:Name="LeftPane"
+                        Grid.Column="0"
+                        Width="300"
+                        ClipToBounds="False"
+                        Background="{DynamicResource PixelBrushSidebarBackground}"
+                        BorderBrush="{DynamicResource PixelBrushBorder}"
+                        BorderThickness="0,0,1,0">
+                    <Grid>
+                        <ExperimentalAcrylicBorder x:Name="SidebarAcrylic"
+                                                   IsVisible="False"
+                                                   IsHitTestVisible="False">
+                            <ExperimentalAcrylicBorder.Material>
+                                <ExperimentalAcrylicMaterial
+                                    BackgroundSource="Digger"
+                                    TintColor="{DynamicResource PixelColorSidebarBackground}"
+                                    TintOpacity="0.78"
+                                    MaterialOpacity="0.65"
+                                    FallbackColor="{DynamicResource PixelColorSidebarBackground}" />
+                            </ExperimentalAcrylicBorder.Material>
+                        </ExperimentalAcrylicBorder>
+                        <ContentControl x:Name="LeftContentHost"
+                                        HorizontalContentAlignment="Stretch"
+                                        VerticalContentAlignment="Stretch"/>
+                    </Grid>
+                </Border>
+
+                <Border x:Name="RightPane"
+                        Grid.Column="1"
+                        Background="{DynamicResource PixelBrushBackground}">
+                    <ContentControl x:Name="RightContentHost"
+                                    HorizontalContentAlignment="Stretch"
+                                    VerticalContentAlignment="Stretch"/>
+                </Border>
+            </Grid>
+
+            <StackPanel x:Name="PanHint"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Bottom"
+                        Margin="0,0,0,20"
+                        Spacing="8"
+                        IsHitTestVisible="False"/>
+
+            <Canvas x:Name="PanFloatingRipple"
+                    IsHitTestVisible="False"
+                    ZIndex="7"/>
+
+            <Canvas x:Name="PanFloatingActions"
+                    Width="44"
+                    Height="120"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Margin="18"
+                    ZIndex="8">
+                <controls:MyFloatingActionButton x:Name="BtnDownloadTasksFloating"
+                                                 Icon="mdi-download-multiple"
+                                                 IconOffsetX="3"
+                                                 IsDanger="False"
+                                                 ToolTip.Tip="下载管理"
+                                                 IsVisible="False"
+                                                 Opacity="0"/>
+                <controls:MyFloatingActionButton x:Name="BtnForceCloseGame"
+                                                 Icon="mdi-close"
+                                                 ToolTip.Tip="强制关闭 Minecraft"
+                                                 IsVisible="False"
+                                                 Opacity="0"/>
+            </Canvas>
+
+            <Canvas x:Name="PanPopupOverlay"
+                    Background="Transparent"
+                    IsHitTestVisible="False"
+                    ZIndex="10"/>
+
+            <Border x:Name="PanMsgBackground"
+                    Background="{DynamicResource PixelBrushOverlay}"
+                    IsVisible="False"
+                    ZIndex="20">
+                <Grid x:Name="PanMsg"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      Width="520"/>
+            </Border>
+        </Grid>
+    </Grid>
 </Window>

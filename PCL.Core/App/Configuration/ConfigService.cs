@@ -114,6 +114,7 @@ public sealed partial class ConfigService
     private static ConfigStorage? _sharedEncryptedConfigProvider;
     private static ConfigStorage? _localConfigProvider;
     private static ConfigStorage? _instanceConfigProvider;
+    private static bool _isTestingInitialization;
 
     /// <summary>
     /// 获取配置提供方。
@@ -201,6 +202,7 @@ public sealed partial class ConfigService
         return;
         void SharedJsonMigration(string from, string to)
         {
+            if (DebugSettingsService.ShouldSkipCopy(from, to)) return;
             File.Copy(from, to);
         }
         void CatIniMigration(string from, string to)
@@ -220,15 +222,18 @@ public sealed partial class ConfigService
 
     private static void _TryMigrate(string target, IEnumerable<ConfigMigration> migrations)
     {
-        Context.Info($"Try migrating config: {target}");
+        if (!_isTestingInitialization)
+            Context.Info($"Try migrating config: {target}");
         try
         {
             var result = ConfigMigration.Migrate(target, migrations);
-            if (!result) Context.Info("No migration solution available");
+            if (!result && !_isTestingInitialization)
+                Context.Info("No migration solution available");
         }
         catch (Exception ex)
         {
-            Context.Warn("Migration failed", ex);
+            if (!_isTestingInitialization)
+                Context.Warn("Migration failed", ex);
         }
     }
 
@@ -296,6 +301,21 @@ public sealed partial class ConfigService
         timer.Stop();
         Context.Info($"Config initialization finished in {timer.ElapsedMilliseconds} ms");
 #endif
+    }
+
+    internal static void EnsureInitializedForTesting()
+    {
+        if (IsInitialized) return;
+        _isTestingInitialization = true;
+        ConfigStorage.ThrowOnAccessError = true;
+        _InitializeConfigItems();
+        _isConfigItemsInitialized = true;
+        _InitializeProviders();
+        _isProvidersInitialized = true;
+        _InitializeObservers();
+        foreach (var (_, item) in _Items)
+            item.TriggerEvent(ConfigEvent.Init, null, true, true);
+        IsInitialized = true;
     }
 
     [LifecycleStop]

@@ -35,19 +35,32 @@ public sealed partial class ThemeService
 
     [RegisterConfigEvent]
     public static ConfigEventRegistry OnColorThemeConfigChanged => new(
-        scope: [Config.Preference.Theme.DarkColorConfig, Config.Preference.Theme.LightColorConfig],
+        scope: [
+            Config.Preference.Theme.DarkColorConfig,
+            Config.Preference.Theme.LightColorConfig,
+            Config.Preference.Theme.ColorSchemeModeConfig,
+            Config.Preference.Theme.ColorSchemeSeedConfig,
+            Config.Preference.Theme.ColorSchemeImageConfig,
+            Config.Preference.Theme.ColorSchemeAutoBackgroundConfig
+        ],
         trigger: ConfigEvent.Update,
         handler: e =>
         {
             // ignore no change or non-current color theme change
             if (e.OldValue == e.Value) return;
-            if (IsDarkMode) { if (e.Item == Config.Preference.Theme.LightColorConfig) return; }
-            else { if (e.Item == Config.Preference.Theme.DarkColorConfig) return; }
+            if (e.Item == Config.Preference.Theme.LightColorConfig || e.Item == Config.Preference.Theme.DarkColorConfig)
+            {
+                if (!string.IsNullOrWhiteSpace(Config.Preference.Theme.ColorSchemeSeed))
+                    return;
+                if (IsDarkMode) { if (e.Item == Config.Preference.Theme.LightColorConfig) return; }
+                else { if (e.Item == Config.Preference.Theme.DarkColorConfig) return; }
+            }
             // trigger color refresh
             if (Lifecycle.CurrentState > LifecycleState.Loading)
             {
                 Dispatcher.UIThread.Post(() =>
                 {
+                    ColorSchemeService.EnsureSeedInitialized();
                     ApplyColorResources();
                     ColorThemeChanged?.Invoke(CurrentTheme);
                     _AprilFoolLogic();
@@ -59,6 +72,7 @@ public sealed partial class ThemeService
     [LifecycleStart]
     private static void _Start()
     {
+        ColorSchemeService.EnsureSeedInitialized();
         IsDarkMode = _IsDarkMode();
         _LogStatus();
         _RefreshAll();
@@ -228,20 +242,31 @@ public sealed partial class ThemeService
     }
 
     /// <summary>
-    /// 应用灰度配色到 WPF 资源字典。
+    /// 应用灰度配色到资源字典。
     /// </summary>
     public static void ApplyGrayResources()
     {
-        var cache = IsDarkMode ? DarkGrayCache : LightGrayCache;
-        foreach (var c in cache) c.Apply();
+        // Pixel color resources are generated as one Material palette in ApplyColorResources.
+        // The method remains for lifecycle compatibility with older theme refresh callers.
     }
 
     /// <summary>
-    /// 应用彩色配色到 WPF 资源字典。
+    /// 应用彩色配色到资源字典。
     /// </summary>
     public static void ApplyColorResources()
     {
-        var colors = _CalculateColors(CurrentTone, GetCurrentThemeArgs());
-        foreach (var c in colors) c.Apply();
+        PixelThemePaletteBuilder.BuildFromSeed(ColorSchemeService.GetEffectiveSeed(), IsDarkMode).Apply();
+    }
+
+    public static void RefreshColorScheme()
+    {
+        if (Lifecycle.CurrentState > LifecycleState.Loading)
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                ApplyColorResources();
+                ColorThemeChanged?.Invoke(CurrentTheme);
+            });
+        }
     }
 }

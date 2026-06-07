@@ -4,6 +4,8 @@ using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Markup.Xaml;
+using PCL.Core.App.Essentials;
+using PCL.Core.App.IoC;
 using Pixel_Craft_Launcher.ViewModels;
 using Pixel_Craft_Launcher.Views;
 
@@ -14,16 +16,17 @@ public partial class App : Application
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
+        ApplicationService.Loading = () => this;
+        MainWindowService.Loading = () => new MainWindow();
+        Lifecycle.OnInitialize();
     }
 
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = new MainWindowViewModel(),
-            };
+            MainWindowService.Loading = () => new MainWindow();
+            Lifecycle.OnLoading();
         }
 
         base.OnFrameworkInitializationCompleted();

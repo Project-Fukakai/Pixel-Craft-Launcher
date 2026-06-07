@@ -147,7 +147,10 @@ partial class Lifecycle
         }
         catch (Exception ex)
         {
-            SystemContext.Fatal($"注册服务项实例化失败: {fullname}", ex);
+            Logging.ActionLevel? actionLevel = CurrentState == LifecycleState.BeforeLoading
+                ? Logging.ActionLevel.NormalLog
+                : null;
+            SystemContext.Fatal($"注册服务项实例化失败: {fullname}", ex, actionLevel);
             throw;
         }
     }

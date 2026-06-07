@@ -9,6 +9,13 @@ public class NDlSourceManager<TSourceArgument>(IList<IDlResourceMapping<TSourceA
 
     public TSourceArgument? Parse(string resId)
     {
-        throw new System.NotImplementedException();
+        foreach (var source in Sources)
+        {
+            var result = source.Parse(resId);
+            if (result is not null)
+                return result;
+        }
+
+        return default;
     }
 }

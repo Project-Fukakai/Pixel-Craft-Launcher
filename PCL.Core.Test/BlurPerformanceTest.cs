@@ -8,6 +8,8 @@ using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PCL.Core.UI.Effects;
+using WpfKernelType = System.Windows.Media.Effects.KernelType;
+using WpfRenderingBias = System.Windows.Media.Effects.RenderingBias;
 
 namespace PCL.Core.Test;
 
@@ -209,16 +211,16 @@ public static class BlurPerformanceTest
     private static BlurEffect CreateOriginalBlur() => new()
     {
         Radius = 16.0,
-        KernelType = KernelType.Gaussian,
-        RenderingBias = RenderingBias.Performance
+        KernelType = WpfKernelType.Gaussian,
+        RenderingBias = WpfRenderingBias.Performance
     };
 
     private static OptimizedBlurEffect CreateOptimizedBlur(double samplingRate) => new()
     {
         Radius = 16.0,
         SamplingRate = samplingRate,
-        RenderingBias = RenderingBias.Performance,
-        KernelType = KernelType.Gaussian
+        RenderingBias = WpfRenderingBias.Performance,
+        KernelType = WpfKernelType.Gaussian
     };
 
     private static double CalculateAverage(double[] values)

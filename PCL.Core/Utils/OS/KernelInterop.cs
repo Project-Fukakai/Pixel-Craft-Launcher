@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -61,6 +64,9 @@ public static partial class KernelInterop
     }
 
     private const int ERROR_ACCESS_DENIED = 5;
+    private static readonly object _MemoryCacheLock = new();
+    private static DateTime _MemoryCacheTime = DateTime.MinValue;
+    private static (ulong Total, ulong Available) _MemoryCacheValue;
 
     [LibraryImport("kernel32.dll", EntryPoint = "AllocConsole")]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -229,7 +235,7 @@ public static partial class KernelInterop
     public static ulong GetAvailablePhysicalMemoryBytes()
     {
         if (!OperatingSystem.IsWindows())
-            return (ulong)Math.Max(0, GC.GetGCMemoryInfo().TotalAvailableMemoryBytes);
+            return GetNonWindowsPhysicalMemoryBytes().Available;
 
         var status = CreateStatus();
         if (!GlobalMemoryStatusEx(ref status)) _ThrowLastWin32Error();
@@ -242,10 +248,7 @@ public static partial class KernelInterop
     public static (ulong Total, ulong Available) GetPhysicalMemoryBytes()
     {
         if (!OperatingSystem.IsWindows())
-        {
-            var total = (ulong)Math.Max(0, GC.GetGCMemoryInfo().TotalAvailableMemoryBytes);
-            return (total, total);
-        }
+            return GetNonWindowsPhysicalMemoryBytes();
 
         var status = CreateStatus();
         if (!GlobalMemoryStatusEx(ref status)) _ThrowLastWin32Error();
@@ -257,11 +260,151 @@ public static partial class KernelInterop
     /// </summary>
     public static double GetMemoryLoadPercent()
     {
-        if (!OperatingSystem.IsWindows()) return 0;
+        if (!OperatingSystem.IsWindows())
+        {
+            var (total, available) = GetNonWindowsPhysicalMemoryBytes();
+            return total == 0 ? 0 : Math.Clamp((total - available) * 100d / total, 0, 100);
+        }
 
         var status = CreateStatus();
         if (!GlobalMemoryStatusEx(ref status)) _ThrowLastWin32Error();
         return status.dwMemoryLoad;
+    }
+
+    private static (ulong Total, ulong Available) GetNonWindowsPhysicalMemoryBytes()
+    {
+        lock (_MemoryCacheLock)
+        {
+            if (DateTime.UtcNow - _MemoryCacheTime < TimeSpan.FromMilliseconds(800) && _MemoryCacheValue.Total > 0)
+                return _MemoryCacheValue;
+
+            var value = OperatingSystem.IsMacOS()
+                ? GetMacPhysicalMemoryBytes()
+                : OperatingSystem.IsLinux()
+                    ? GetLinuxPhysicalMemoryBytes()
+                    : GetFallbackPhysicalMemoryBytes();
+            if (value.Total == 0 || value.Available > value.Total)
+                value = GetFallbackPhysicalMemoryBytes();
+
+            _MemoryCacheValue = value;
+            _MemoryCacheTime = DateTime.UtcNow;
+            return value;
+        }
+    }
+
+    private static (ulong Total, ulong Available) GetLinuxPhysicalMemoryBytes()
+    {
+        try
+        {
+            ulong totalKb = 0;
+            ulong availableKb = 0;
+            foreach (var line in File.ReadLines("/proc/meminfo"))
+            {
+                if (line.StartsWith("MemTotal:", StringComparison.Ordinal))
+                    totalKb = ParseMemInfoKb(line);
+                else if (line.StartsWith("MemAvailable:", StringComparison.Ordinal))
+                    availableKb = ParseMemInfoKb(line);
+            }
+
+            return (totalKb * 1024, availableKb * 1024);
+        }
+        catch
+        {
+            return (0, 0);
+        }
+    }
+
+    private static ulong ParseMemInfoKb(string line)
+    {
+        var digits = new string(line.Where(char.IsDigit).ToArray());
+        return ulong.TryParse(digits, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) ? value : 0;
+    }
+
+    private static (ulong Total, ulong Available) GetMacPhysicalMemoryBytes()
+    {
+        try
+        {
+            var total = ParseUInt64(RunProcessCapture("/usr/sbin/sysctl", "-n", "hw.memsize"));
+            var vmStat = RunProcessCapture("/usr/bin/vm_stat");
+            var pageSize = ParseMacPageSize(vmStat);
+            var pages = ParseMacVmStatPages(vmStat);
+
+            pages.TryGetValue("Pages free", out var free);
+            pages.TryGetValue("Pages inactive", out var inactive);
+            pages.TryGetValue("Pages speculative", out var speculative);
+            pages.TryGetValue("Pages purgeable", out var purgeable);
+            var available = checked((free + inactive + speculative + purgeable) * pageSize);
+            return (total, Math.Min(available, total));
+        }
+        catch
+        {
+            return (0, 0);
+        }
+    }
+
+    private static ulong ParseMacPageSize(string vmStat)
+    {
+        const string marker = "page size of ";
+        var index = vmStat.IndexOf(marker, StringComparison.OrdinalIgnoreCase);
+        if (index < 0) return 4096;
+        index += marker.Length;
+        var end = index;
+        while (end < vmStat.Length && char.IsDigit(vmStat[end])) end++;
+        return ulong.TryParse(vmStat[index..end], NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)
+            ? value
+            : 4096;
+    }
+
+    private static Dictionary<string, ulong> ParseMacVmStatPages(string vmStat)
+    {
+        var result = new Dictionary<string, ulong>(StringComparer.Ordinal);
+        foreach (var rawLine in vmStat.Split('\n', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var parts = rawLine.Split(':', 2, StringSplitOptions.TrimEntries);
+            if (parts.Length != 2) continue;
+            var digits = new string(parts[1].TakeWhile(c => char.IsDigit(c) || char.IsWhiteSpace(c)).Where(char.IsDigit).ToArray());
+            if (ulong.TryParse(digits, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value))
+                result[parts[0]] = value;
+        }
+
+        return result;
+    }
+
+    private static ulong ParseUInt64(string text)
+    {
+        var digits = new string(text.Where(char.IsDigit).ToArray());
+        return ulong.TryParse(digits, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) ? value : 0;
+    }
+
+    private static string RunProcessCapture(string fileName, params string[] arguments)
+    {
+        using var process = new Process
+        {
+            StartInfo = new ProcessStartInfo(fileName)
+            {
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true
+            }
+        };
+        foreach (var argument in arguments)
+            process.StartInfo.ArgumentList.Add(argument);
+        process.Start();
+        var output = process.StandardOutput.ReadToEnd();
+        if (!process.WaitForExit(1500))
+        {
+            try { process.Kill(true); }
+            catch { /* best effort */ }
+        }
+        return output;
+    }
+
+    private static (ulong Total, ulong Available) GetFallbackPhysicalMemoryBytes()
+    {
+        var total = (ulong)Math.Max(0, GC.GetGCMemoryInfo().TotalAvailableMemoryBytes);
+        var heap = (ulong)Math.Max(0, GC.GetGCMemoryInfo().HeapSizeBytes);
+        return (total, total > heap ? total - heap : total);
     }
 
     /// <summary>

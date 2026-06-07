@@ -17,6 +17,11 @@ public sealed partial class DependencyCheckService
     private static async Task _Start()
     {
         Context.Info("开始环境检查……");
+        if (!OperatingSystem.IsWindows())
+        {
+            Context.Info("当前平台不需要 Windows 运行依赖检查，已跳过");
+            return;
+        }
 
         if (RuntimeInformation.OSArchitecture.Equals(Architecture.Arm64))
             await _CheckAndAsk("Microsoft.D3DMappingLayers", "OpenGL 兼容包", "9nqpsl29bfff")

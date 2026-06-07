@@ -16,9 +16,15 @@ public partial class NetworkService {
 
     private static ServiceProvider? _provider;
     private static IHttpClientFactory? _factory;
+    private static readonly object _providerLock = new();
 
     [LifecycleStart]
     private static void _Start()
+    {
+        ReloadDefaultClientFactory();
+    }
+
+    public static void ReloadDefaultClientFactory()
     {
         var services = new ServiceCollection();
         services.AddHttpClient("default")
@@ -36,14 +42,24 @@ public partial class NetworkService {
             }
         );
 
-        _provider = services.BuildServiceProvider();
-        _factory = _provider.GetRequiredService<IHttpClientFactory>();
-        
+        var provider = services.BuildServiceProvider();
+        lock (_providerLock)
+        {
+            var oldProvider = _provider;
+            _provider = provider;
+            _factory = provider.GetRequiredService<IHttpClientFactory>();
+            oldProvider?.Dispose();
+        }
     }
 
     [LifecycleStop]
     private static void _Stop() {
-        _provider?.Dispose();
+        lock (_providerLock)
+        {
+            _provider?.Dispose();
+            _provider = null;
+            _factory = null;
+        }
     }
 
     /// <summary>
@@ -53,8 +69,11 @@ public partial class NetworkService {
     /// <returns>HttpClient 实例</returns>
     public static HttpClient GetClient(string wantClientType = "default")
     {
-        return _factory?.CreateClient(wantClientType) ??
-               throw new InvalidOperationException("在初始化完成前的意外调用");
+        lock (_providerLock)
+        {
+            return _factory?.CreateClient(wantClientType) ??
+                   throw new InvalidOperationException("在初始化完成前的意外调用");
+        }
     }
 
     private const int BaseRetryDelayMs = 1000;

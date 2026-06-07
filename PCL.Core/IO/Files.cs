@@ -20,6 +20,7 @@ using Avalonia.Controls;
 using Avalonia.Input.Platform;
 using Avalonia.Platform.Storage;
 using PCL.Core.App;
+using PCL.Core.App.Configuration;
 
 namespace PCL.Core.IO;
 
@@ -148,6 +149,7 @@ public static class Files {
             var fullFromPath = GetFullPath(fromPath);
             var fullToPath = GetFullPath(toPath);
             if (fullFromPath == fullToPath) return;
+            if (DebugSettingsService.ShouldSkipCopy(fullFromPath, fullToPath)) return;
 
             var directoryName = Path.GetDirectoryName(fullToPath);
             if (directoryName is null) {
@@ -168,6 +170,7 @@ public static class Files {
     }
 
     public static async Task CopyDirectoryAsync(string sourceDir, string destDir, CancellationToken cancelToken = default) {
+        if (DebugSettingsService.ShouldSkipCopy(sourceDir, destDir)) return;
         Directory.CreateDirectory(destDir);
 
         // 获取所有文件和子目录

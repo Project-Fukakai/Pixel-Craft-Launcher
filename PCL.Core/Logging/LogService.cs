@@ -45,7 +45,7 @@ public class LogService : ILifecycleLogService
 
     private static void _LogAction(LogLevel level, ActionLevel actionLevel, string formatted, string plain, Exception? ex)
     {
-        if (ex is not null) {
+        if (ex is not null && Config.System.Telemetry) {
             TelemetryService.ReportException(ex, plain, level);
         }
         
