@@ -10,6 +10,7 @@ using PCL.Core.Utils.Secret;
 using static PCL.Core.Link.EasyTier.ETInfoProvider;
 using static PCL.Core.Link.Lobby.LobbyInfoProvider;
 using static PCL.Core.Link.Natayark.NatayarkProfileManager;
+using PCL.Core.Link.Scaffolding.EasyTier;
 
 namespace PCL.Core.Link.EasyTier;
 // ReSharper disable InconsistentNaming
@@ -37,8 +38,7 @@ public static class ETController
 
         // 检查文件
         LogWrapper.Info("Link", "EasyTier 路径: " + ETPath);
-        if (!(File.Exists(ETPath + "\\easytier-core.exe") && File.Exists(ETPath + "\\easytier-cli.exe") &&
-              File.Exists(ETPath + "\\Packet.dll")))
+        if (!EasyTierMetadata.IsInstalled())
         {
             LogWrapper.Error("Link", "EasyTier 不存在或不完整");
             return 1;
@@ -61,8 +61,10 @@ public static class ETController
                 EnableRaisingEvents = true,
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = $"{ETPath}\\easytier-core.exe", WorkingDirectory = ETPath,
-                    WindowStyle = ProcessWindowStyle.Hidden
+                    FileName = EasyTierMetadata.CoreExecutablePath, WorkingDirectory = ETPath,
+                    WindowStyle = OperatingSystem.IsWindows() ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
+                    CreateNoWindow = OperatingSystem.IsWindows(),
+                    UseShellExecute = false
                 }
             };
 

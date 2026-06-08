@@ -122,9 +122,7 @@ public class LobbyService() : GeneralService("lobby", "LobbyService")
     }
 
     private static bool _IsEasyTierCoreFileNotExist() =>
-        !File.Exists(Path.Combine(EasyTierMetadata.EasyTierFilePath, "easytier-core.exe")) &&
-        !File.Exists(Path.Combine(EasyTierMetadata.EasyTierFilePath, "Packet.dll")) &&
-        !File.Exists(Path.Combine(EasyTierMetadata.EasyTierFilePath, "easytier-cli.exe"));
+        !EasyTierMetadata.IsInstalled();
 
 
     public static async Task InitializeAsync()

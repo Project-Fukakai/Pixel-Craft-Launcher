@@ -235,6 +235,42 @@ public class MinecraftDownloadServicesTest
     }
 
     [TestMethod]
+    public void CurseForgeAddonParserBuildsOptiFabricFallbackDownloadUrl()
+    {
+        var files = MinecraftModLoaderCatalogService.ParseCurseForgeAddonFiles(
+            MinecraftAddonKind.OptiFabric,
+            "322385",
+            new JsonObject
+            {
+                ["data"] = new JsonArray
+                {
+                    new JsonObject
+                    {
+                        ["id"] = 5699256,
+                        ["displayName"] = "OptiFabric 1.14.3",
+                        ["fileName"] = "optifabric-1.14.3 mc1.20.1.jar",
+                        ["downloadUrl"] = null,
+                        ["gameVersions"] = new JsonArray("1.20.1", "Fabric", "Java 17"),
+                        ["hashes"] = new JsonArray(new JsonObject { ["algo"] = 1, ["value"] = "abc" }),
+                        ["fileLength"] = 1234,
+                        ["releaseType"] = 1,
+                        ["fileDate"] = "2024-09-01T00:00:00Z"
+                    }
+                }
+            });
+
+        var file = files.Single();
+
+        Assert.AreEqual(MinecraftAddonKind.OptiFabric, file.Kind);
+        Assert.AreEqual(MinecraftRemoteSource.CurseForge, file.Source);
+        Assert.AreEqual("optifabric-1.14.3 mc1.20.1.jar", file.FileName);
+        CollectionAssert.Contains(file.GameVersions.ToArray(), "1.20.1");
+        CollectionAssert.Contains(file.Loaders.ToArray(), MinecraftLoaderKind.Fabric);
+        StringAssert.Contains(file.DownloadUrls.First(), "https://edge.forgecdn.net/files/5699/256/");
+        StringAssert.Contains(file.DownloadUrls.First(), "optifabric-1.14.3%20mc1.20.1.jar");
+    }
+
+    [TestMethod]
     public async Task MergedInstallParsesInstallerVersionJsonWithoutRunningJava()
     {
         using var server = new InstallFixtureServer();

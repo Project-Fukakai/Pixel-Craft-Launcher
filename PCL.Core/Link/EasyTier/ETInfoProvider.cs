@@ -10,6 +10,7 @@ using System.Text.Json.Nodes;
 using PCL.Core.App;
 using PCL.Core.IO;
 using PCL.Core.Logging;
+using PCL.Core.Link.Scaffolding.EasyTier;
 
 namespace PCL.Core.Link.EasyTier;
 // ReSharper disable InconsistentNaming, CompareOfFloatsByEqualityOperator
@@ -58,8 +59,7 @@ public static class ETInfoProvider
     public const string ETNetworkNamePrefix = "PCLCELobby";
     public const string ETNetworkSecretPrefix = "PCLCEETLOBBY2025";
     public const string ETVersion = Scaffolding.EasyTier.EasyTierMetadata.CurrentEasyTierVer;
-    public static readonly string ETPath = Path.Combine(Paths.SharedLocalData, "EasyTier", ETVersion,
-        "easytier-windows-" + (RuntimeInformation.OSArchitecture == Architecture.Arm64 ? "arm64" : "x86_64"));
+    public static readonly string ETPath = EasyTierMetadata.EasyTierFilePath;
 
     private static ETConnectionType _GetConnectionType(string cost)
     {
@@ -73,12 +73,12 @@ public static class ETInfoProvider
     private static readonly Process _CliProcess = new() { 
         StartInfo = new ProcessStartInfo
         {
-            FileName = $"{ETPath}\\easytier-cli.exe",
+            FileName = EasyTierMetadata.CliExecutablePath,
             WorkingDirectory = ETPath,
             Arguments= $"--rpc-portal 127.0.0.1:{ETController.ETRpcPort} -o json peer",
             ErrorDialog = false,
-            CreateNoWindow = true,
-            WindowStyle = ProcessWindowStyle.Hidden,
+            CreateNoWindow = OperatingSystem.IsWindows(),
+            WindowStyle = OperatingSystem.IsWindows() ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

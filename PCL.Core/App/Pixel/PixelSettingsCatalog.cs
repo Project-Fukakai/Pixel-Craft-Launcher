@@ -59,7 +59,14 @@ public static class PixelSettingsCatalog
         ]),
         new(PixelSettingSectionKind.GameLink, "联机", "EasyTier 联机设置", "mdi-lan-connect", "UiHiddenSetupGameLink",
         [
-            Group("EasyTier", [Text("大厅用户名", "LinkUsername"), Text("自定义中继服务器", "LinkRelayServer"), Combo("中继方式", "LinkRelayType", ["自动决定", "仅中继"]), Combo("中继服务器类型", "LinkServerType", ["仅自有节点", "自有 + 社区节点", "不使用预设节点"]), Combo("传输协议优先", "LinkProtocolPreference", ["TCP", "UDP"]), Toggle("延迟优先模式", "LinkLatencyFirstMode"), Toggle("尝试对称 NAT 端口猜测", "LinkTryPunchSym"), Toggle("启用 IPv6", "LinkEnableIPv6"), Toggle("输出 EasyTier CLI 调试信息", "LinkEnableCliOutput")])
+            Group("EasyTier", [
+                Text("大厅用户名", "LinkUsername", "PCL CE 会尽可能使用此处的用户名用于大厅信息展示。若留空，则使用 Natayark ID 的用户名。"),
+                Combo("传输协议优先", "LinkProtocolPreference", ["TCP", "UDP"], "TCP 通常更稳定，UDP 通常延迟更低。"),
+                Toggle("选择最低延迟路径而不是最短路径", "LinkLatencyFirstMode", "启用后 EasyTier 会优先选择延迟最低的路径，可能降低延迟，也可能提高丢包率。"),
+                Toggle("对对称型 NAT 进行端口猜测", "LinkTryPunchSym", "让 EasyTier 尝试对对称型 NAT 进行端口猜测，一般保持开启即可。"),
+                Toggle("允许使用 IPv6 通信", "LinkEnableIPv6", "IPv6 更容易建立 P2P 连接，除有特殊原因外不建议关闭。"),
+                Toggle("在日志中输出 CLI 信息以用于调试", "LinkEnableCliOutput", "每 30 秒输出一次 EasyTier CLI 信息，仅建议排查问题时开启。")
+            ])
         ]),
         new(PixelSettingSectionKind.Ui, "个性化", "主题、背景、字体与标题栏", "mdi-palette-outline", "UiHiddenSetupUi",
         [

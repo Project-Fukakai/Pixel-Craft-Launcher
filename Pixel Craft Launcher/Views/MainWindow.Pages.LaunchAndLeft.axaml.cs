@@ -19,6 +19,8 @@ using Avalonia.VisualTree;
 using PCL.Core.App;
 using PCL.Core.App.IoC;
 using PCL.Core.App.Pixel;
+using PCL.Core.Link.Lobby;
+using PCL.Core.Link.Scaffolding.EasyTier;
 using PCL.Core.Minecraft;
 using PCL.Core.Minecraft.Java;
 using PCL.Core.Minecraft.Launch;
@@ -39,6 +41,9 @@ public partial class MainWindow
 {
     private Control BuildLeftPage(MainPageKind page)
     {
+        if (page == MainPageKind.Tools)
+            return BuildToolsLeftPage();
+
         var stack = new StackPanel
         {
             Margin = new Thickness(14, 16),
@@ -68,6 +73,90 @@ public partial class MainWindow
         }
 
         return stack;
+    }
+
+    private Control BuildToolsLeftPage()
+    {
+        var stack = new StackPanel
+        {
+            Margin = new Thickness(14, 16),
+            Spacing = 10
+        };
+
+        stack.Children.Add(new TextBlock
+        {
+            Text = "联机大厅",
+            FontSize = 18,
+            FontWeight = FontWeight.SemiBold,
+            Foreground = BodyForeground,
+            Margin = new Thickness(2, 0, 2, 8)
+        });
+
+        stack.Children.Add(CreateToolsSidebarItem("大厅公告", "服务状态与通知", "mdi-bullhorn-outline", false, () => RefreshToolsGameLinkPage()));
+        stack.Children.Add(CreateToolsSidebarItem("使用协议", States.Link.LinkEula ? "已同意" : "首次使用需确认", "mdi-file-document-outline",
+            _gameLinkSubpage == GameLinkSubpage.Eula,
+            () =>
+            {
+                _gameLinkSubpage = GameLinkSubpage.Eula;
+                RefreshToolsGameLinkPage(true);
+            }));
+        stack.Children.Add(CreateToolsSidebarItem("加入 / 创建", "选择大厅或开放 LAN", "mdi-lan-connect",
+            _gameLinkSubpage == GameLinkSubpage.Select,
+            () =>
+            {
+                if (!States.Link.LinkEula)
+                    _gameLinkSubpage = GameLinkSubpage.Eula;
+                else
+                    _gameLinkSubpage = GameLinkSubpage.Select;
+                RefreshToolsGameLinkPage(true);
+            }));
+
+        var lobbyInfo = LobbyService.CurrentState == LobbyState.Connected
+            ? LobbyService.CurrentLobbyCode ?? "已连接"
+            : "等待连接";
+        stack.Children.Add(CreateToolsSidebarItem("当前大厅", lobbyInfo, "mdi-account-multiple-outline",
+            _gameLinkSubpage == GameLinkSubpage.Finish,
+            () =>
+            {
+                if (LobbyService.CurrentState == LobbyState.Connected)
+                    _gameLinkSubpage = GameLinkSubpage.Finish;
+                RefreshToolsGameLinkPage(true);
+            }));
+
+        stack.Children.Add(new Border { Height = 1, Background = ThemeBrushes.SidebarBorder, Margin = new Thickness(2, 4) });
+
+        var dependencyInfo = EasyTierDependencyService.State switch
+        {
+            EasyTierDependencyState.Installed => "依赖已就绪",
+            EasyTierDependencyState.Installing => "正在自动安装",
+            EasyTierDependencyState.Failed => "安装失败，可重试",
+            EasyTierDependencyState.Unsupported => "当前平台不支持",
+            _ => "等待自动安装"
+        };
+        stack.Children.Add(CreateToolsSidebarItem("EasyTier", dependencyInfo, "mdi-download-network-outline",
+            false,
+            () => RefreshToolsGameLinkPage()));
+
+        if (FeatureVisibilityService.IsToolVisible(PixelToolFeature.Test))
+            stack.Children.Add(CreateToolsSidebarItem("控件验收", "迁移组件预览", "mdi-tools", false,
+                () => SetPageHostContent(RightContentHost, BuildControlsPreviewContentPage(), PageHostUpdateMode.SilentRefresh)));
+
+        return stack;
+    }
+
+    private MyListItem CreateToolsSidebarItem(string title, string info, string icon, bool active, Action action)
+    {
+        var item = new MyListItem
+        {
+            Title = title,
+            Info = info,
+            Type = MyListItem.CheckType.RadioBox,
+            Checked = active,
+            Icon = icon,
+            IsSidebarItem = true
+        };
+        item.Click += (_, _) => action();
+        return item;
     }
 
     private Control BuildDownloadLeftPage()

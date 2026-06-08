@@ -6,12 +6,14 @@ using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using PCL.Core.App;
 using PCL.Core.IO.Download;
 using PCL.Core.Minecraft.Java;
 using PCL.Core.Minecraft.Launch;
@@ -310,12 +312,18 @@ public sealed class MinecraftModLoaderCatalogService
     {
         if (_addonCache.TryGetValue(kind, out var cached)) return cached;
 
+        if (kind == MinecraftAddonKind.OptiFabric)
+        {
+            var optiFabric = await GetOptiFabricFilesAsync(cancellationToken).ConfigureAwait(false);
+            _addonCache[kind] = optiFabric;
+            return optiFabric;
+        }
+
         var slug = kind switch
         {
             MinecraftAddonKind.FabricApi => "fabric-api",
             MinecraftAddonKind.LegacyFabricApi => "legacy-fabric-api",
             MinecraftAddonKind.Qsl => "qsl",
-            MinecraftAddonKind.OptiFabric => "optifabric",
             _ => throw new NotSupportedException(kind.ToString())
         };
         var result = await GetModrinthFilesAsync(kind, slug, cancellationToken).ConfigureAwait(false);
@@ -599,8 +607,142 @@ public sealed class MinecraftModLoaderCatalogService
             .ToArray();
     }
 
+    private static async Task<IReadOnlyList<MinecraftAddonFileEntry>> GetOptiFabricFilesAsync(CancellationToken cancellationToken)
+    {
+        var files = new List<MinecraftAddonFileEntry>();
+
+        if (!string.IsNullOrWhiteSpace(Secrets.CurseForgeAPIKey))
+            files.AddRange(await TryGetAddonFilesAsync(
+                () => GetCurseForgeFilesAsync(MinecraftAddonKind.OptiFabric, "322385", cancellationToken)).ConfigureAwait(false));
+
+        files.AddRange(await TryGetAddonFilesAsync(
+            () => GetModrinthFilesAsync(MinecraftAddonKind.OptiFabric, "optifabric-origins", cancellationToken)).ConfigureAwait(false));
+        files.AddRange(await TryGetAddonFilesAsync(
+            () => GetModrinthFilesAsync(MinecraftAddonKind.OptiFabric, "legacy-optifabric", cancellationToken)).ConfigureAwait(false));
+
+        return files
+            .GroupBy(file => $"{file.Source}:{file.Id}", StringComparer.OrdinalIgnoreCase)
+            .Select(group => group.First())
+            .OrderByDescending(file => file.ReleaseTime ?? DateTime.MinValue)
+            .ToArray();
+    }
+
+    private static async Task<IReadOnlyList<MinecraftAddonFileEntry>> TryGetAddonFilesAsync(
+        Func<Task<IReadOnlyList<MinecraftAddonFileEntry>>> getFiles)
+    {
+        try
+        {
+            return await getFiles().ConfigureAwait(false);
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private static async Task<IReadOnlyList<MinecraftAddonFileEntry>> GetCurseForgeFilesAsync(
+        MinecraftAddonKind kind,
+        string projectId,
+        CancellationToken cancellationToken)
+    {
+        var root = await FetchJsonObjectFallbackAsync(
+            [$"https://api.curseforge.com/v1/mods/{projectId}/files?pageSize=10000"],
+            cancellationToken).ConfigureAwait(false);
+        return ParseCurseForgeAddonFiles(kind, projectId, root);
+    }
+
+    internal static IReadOnlyList<MinecraftAddonFileEntry> ParseCurseForgeAddonFiles(
+        MinecraftAddonKind kind,
+        string projectId,
+        JsonObject root)
+    {
+        if (root["data"] is not JsonArray data) return [];
+        return data.OfType<JsonObject>()
+            .Select(item => ParseCurseForgeAddonFile(kind, projectId, item))
+            .OfType<MinecraftAddonFileEntry>()
+            .Where(static file => file.DownloadUrls.Count > 0)
+            .ToArray();
+    }
+
+    private static MinecraftAddonFileEntry? ParseCurseForgeAddonFile(
+        MinecraftAddonKind kind,
+        string projectId,
+        JsonObject item)
+    {
+        var id = item["id"]?.GetValue<int?>()?.ToString(CultureInfo.InvariantCulture);
+        var fileName = item["fileName"]?.GetValue<string>();
+        if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(fileName)) return null;
+
+        var downloadUrl = item["downloadUrl"]?.GetValue<string>();
+        if (string.IsNullOrWhiteSpace(downloadUrl) && int.TryParse(id, NumberStyles.Integer, CultureInfo.InvariantCulture, out var fileId))
+            downloadUrl = BuildCurseForgeEdgeFileUrl(fileId, fileName);
+        if (string.IsNullOrWhiteSpace(downloadUrl)) return null;
+
+        var rawVersions = (item["gameVersions"] as JsonArray)?
+            .Select(version => version?.GetValue<string>()?.Trim() ?? string.Empty)
+            .Where(static version => version.Length > 0)
+            .ToArray() ?? [];
+        var loaders = rawVersions.Select(ToLoaderKind).OfType<MinecraftLoaderKind>().Distinct().ToArray();
+        var gameVersions = rawVersions
+            .Where(IsMinecraftGameVersionTag)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        var sha1 = (item["hashes"] as JsonArray)?.OfType<JsonObject>()
+            .FirstOrDefault(hash => hash["algo"]?.GetValue<int?>() == 1)?["value"]?.GetValue<string>();
+        var releaseType = item["releaseType"]?.GetValue<int?>() ?? 0;
+        return new MinecraftAddonFileEntry(
+            kind,
+            id,
+            item["displayName"]?.GetValue<string>()?.Trim() ?? fileName,
+            fileName,
+            MinecraftResourceResolver.MapUrls(downloadUrl).Distinct(StringComparer.OrdinalIgnoreCase).ToArray(),
+            gameVersions,
+            loaders,
+            sha1,
+            GetOptionalLong(item["fileLength"]),
+            releaseType == 1,
+            ParseOptionalDate(item["fileDate"]?.GetValue<string>()),
+            MinecraftRemoteSource.CurseForge);
+    }
+
+    private static long? GetOptionalLong(JsonNode? node)
+    {
+        if (node is null) return null;
+        try
+        {
+            return node.GetValue<long>();
+        }
+        catch
+        {
+            try
+            {
+                return node.GetValue<int>();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+    }
+
+    private static string BuildCurseForgeEdgeFileUrl(int fileId, string fileName)
+    {
+        var id = fileId.ToString(CultureInfo.InvariantCulture);
+        var folder = id.Length > 3 ? id[..4] + "/" + id[4..] : "0/" + id;
+        var encodedName = WebUtility.UrlEncode(fileName).Replace("+", "%20", StringComparison.Ordinal);
+        return $"https://edge.forgecdn.net/files/{folder}/{encodedName}";
+    }
+
+    private static bool IsMinecraftGameVersionTag(string value) =>
+        MinecraftVersionNumber.TryParse(value) is not null ||
+        Regex.IsMatch(value, @"^\d{2}w\d{2}[a-z]$", RegexOptions.IgnoreCase) ||
+        Regex.IsMatch(value, @"^b\d+(?:\.\d+)+$", RegexOptions.IgnoreCase);
+
     private static MinecraftLoaderKind? ToLoaderKind(JsonNode? node) =>
-        node?.GetValue<string>()?.ToLowerInvariant() switch
+        ToLoaderKind(node?.GetValue<string>());
+
+    private static MinecraftLoaderKind? ToLoaderKind(string? value) =>
+        value?.ToLowerInvariant() switch
         {
             "forge" => MinecraftLoaderKind.Forge,
             "neoforge" => MinecraftLoaderKind.NeoForge,
@@ -649,6 +791,9 @@ public sealed class MinecraftModLoaderCatalogService
     {
         using var request = new HttpRequestMessage(HttpMethod.Get, url);
         request.Headers.UserAgent.ParseAdd("PCL-CE/1.0");
+        if (url.Contains("api.curseforge.com", StringComparison.OrdinalIgnoreCase) &&
+            !string.IsNullOrWhiteSpace(Secrets.CurseForgeAPIKey))
+            request.Headers.Add("x-api-key", Secrets.CurseForgeAPIKey);
         return await (await Http.SendAsync(request, cancellationToken).ConfigureAwait(false))
             .EnsureSuccessStatusCode()
             .Content

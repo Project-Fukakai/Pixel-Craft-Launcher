@@ -21,6 +21,7 @@ using PCL.Core.App.Pixel;
 using PCL.Core.Minecraft;
 using PCL.Core.Minecraft.Java;
 using PCL.Core.Minecraft.Launch;
+using PCL.Core.Link.Scaffolding.EasyTier;
 using PCL.Core.UI.Theme;
 using PCL.Core.Utils.OS;
 using Pixel_Craft_Launcher.Controls;
@@ -1118,6 +1119,8 @@ public partial class MainWindow
     {
         if (_selectedSetupSection == PixelSettingSectionKind.Java)
             return BuildJavaSetupRightPage();
+        if (_selectedSetupSection == PixelSettingSectionKind.GameLink)
+            return BuildGameLinkSetupRightPage();
         if (_selectedSetupSection == PixelSettingSectionKind.About)
             return BuildAboutRightPage();
 
@@ -1137,6 +1140,89 @@ public partial class MainWindow
         }
 
         return BuildScrollableMainPane(stack);
+    }
+
+    private Control BuildGameLinkSetupRightPage()
+    {
+        var section = PixelSettingsCatalog.Get(PixelSettingSectionKind.GameLink);
+        var stack = CreatePageStack();
+        stack.Children.Add(new MyHint
+        {
+            Text = "修改此处的设置后，需要重新启动大厅以使设置生效。",
+            Theme = MyHint.Themes.Yellow,
+            CanClose = false
+        });
+
+        foreach (var group in section.Groups)
+        {
+            var content = new StackPanel { Spacing = 12 };
+            foreach (var setting in group.Settings)
+                content.Children.Add(BuildSettingControl(setting));
+            stack.Children.Add(BuildCard(group.Title, content));
+        }
+
+        stack.Children.Add(BuildCard("网络测试", BuildGameLinkNetworkTestPanel()));
+        return BuildScrollableMainPane(stack);
+    }
+
+    private Control BuildGameLinkNetworkTestPanel()
+    {
+        var udpText = CreateBodyText("UDP NAT 类型: 尚未检测");
+        var tcpText = CreateBodyText("TCP NAT 类型: 尚未检测");
+        var ipv6Text = CreateBodyText("IPv6: 尚未检测");
+        var platformText = CreateSubText(EasyTierMetadata.IsPlatformSupported
+            ? $"EasyTier 平台包: {EasyTierMetadata.Platform.PlatformId}"
+            : EasyTierMetadata.GetUnsupportedReason());
+
+        var button = CreateActionButton("开始测试", "mdi-earth");
+        button.IsEnabled = EasyTierMetadata.IsPlatformSupported;
+        button.Click += async (_, _) =>
+        {
+            button.IsEnabled = false;
+            button.Text = "正在测试";
+            try
+            {
+                if (!await EasyTierDependencyService.EnsureInstalledAsync())
+                {
+                    ShowHint(EasyTierDependencyService.LastError ?? "EasyTier 依赖不可用。", HintType.Critical);
+                    return;
+                }
+
+                var status = await CliNetTest.GetNetStatusAsync();
+                if (status is null)
+                {
+                    ShowHint("网络测试失败，请检查 EasyTier 依赖和网络连接。", HintType.Critical);
+                    return;
+                }
+
+                udpText.Text = "UDP NAT 类型: " + CliNetTest.GetNatTypeString(status.UdpNatType);
+                tcpText.Text = "TCP NAT 类型: " + CliNetTest.GetNatTypeString(status.TcpNatType);
+                ipv6Text.Text = "IPv6: " + (status.SupportIPv6 ? "支持" : "不支持");
+                ShowHint("网络测试完成。", HintType.Finish);
+            }
+            catch (Exception ex)
+            {
+                ShowHint("网络测试失败：" + ex.Message, HintType.Critical);
+            }
+            finally
+            {
+                button.Text = "开始测试";
+                button.IsEnabled = EasyTierMetadata.IsPlatformSupported;
+            }
+        };
+
+        return new StackPanel
+        {
+            Spacing = 8,
+            Children =
+            {
+                platformText,
+                udpText,
+                tcpText,
+                ipv6Text,
+                new WrapPanel { Children = { button } }
+            }
+        };
     }
 
     private Control BuildAboutRightPage()

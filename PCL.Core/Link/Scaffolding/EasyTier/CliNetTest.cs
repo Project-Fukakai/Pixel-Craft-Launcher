@@ -32,15 +32,18 @@ public class CliNetTest
 
     public async static Task<NetStatus?> GetNetStatusAsync()
     {
+        if (!EasyTierMetadata.IsInstalled())
+            return null;
+
         using var cliProcess = new Process();
         cliProcess.StartInfo = new ProcessStartInfo
         {
-            FileName = $"{EasyTierMetadata.EasyTierFilePath}\\easytier-cli.exe",
+            FileName = EasyTierMetadata.CliExecutablePath,
             WorkingDirectory = EasyTierMetadata.EasyTierFilePath,
             Arguments = $"-o json stun",
             ErrorDialog = false,
-            CreateNoWindow = true,
-            WindowStyle = ProcessWindowStyle.Hidden,
+            CreateNoWindow = OperatingSystem.IsWindows(),
+            WindowStyle = OperatingSystem.IsWindows() ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

@@ -71,9 +71,7 @@ public class EasyTierEntity
 
         LogWrapper.Info("EasyTier", $"EasyTier folder path: {EasyTierMetadata.EasyTierFilePath}");
 
-        if (!(File.Exists($"{EasyTierMetadata.EasyTierFilePath}\\easytier-core.exe") &&
-              File.Exists($"{EasyTierMetadata.EasyTierFilePath}\\easytier-cli.exe") &&
-              File.Exists($"{EasyTierMetadata.EasyTierFilePath}\\Packet.dll")))
+        if (!EasyTierMetadata.IsInstalled())
         {
             LogWrapper.Error("EasyTier", "EasyTier was broken.");
 
@@ -158,9 +156,11 @@ public class EasyTierEntity
             EnableRaisingEvents = true,
             StartInfo = new ProcessStartInfo
             {
-                FileName = Path.Combine(EasyTierMetadata.EasyTierFilePath, "easytier-core.exe"),
+                FileName = EasyTierMetadata.CoreExecutablePath,
                 WorkingDirectory = EasyTierMetadata.EasyTierFilePath,
-                WindowStyle = ProcessWindowStyle.Hidden
+                WindowStyle = OperatingSystem.IsWindows() ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
+                CreateNoWindow = OperatingSystem.IsWindows(),
+                UseShellExecute = false
             }
         };
 
@@ -370,11 +370,11 @@ public class EasyTierEntity
         using var cliProcess = new Process();
         cliProcess.StartInfo = new ProcessStartInfo
         {
-            FileName = $"{EasyTierMetadata.EasyTierFilePath}\\easytier-cli.exe",
+            FileName = EasyTierMetadata.CliExecutablePath,
             WorkingDirectory = EasyTierMetadata.EasyTierFilePath,
             ErrorDialog = false,
-            CreateNoWindow = true,
-            WindowStyle = ProcessWindowStyle.Hidden,
+            CreateNoWindow = OperatingSystem.IsWindows(),
+            WindowStyle = OperatingSystem.IsWindows() ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
@@ -423,12 +423,12 @@ public class EasyTierEntity
             using var cliProcess = new Process();
             cliProcess.StartInfo = new ProcessStartInfo
             {
-                FileName = $"{EasyTierMetadata.EasyTierFilePath}\\easytier-cli.exe",
+                FileName = EasyTierMetadata.CliExecutablePath,
                 WorkingDirectory = EasyTierMetadata.EasyTierFilePath,
                 Arguments = $"--rpc-portal 127.0.0.1:{_rpcPort} peer",
                 ErrorDialog = false,
-                CreateNoWindow = true,
-                WindowStyle = ProcessWindowStyle.Hidden,
+                CreateNoWindow = OperatingSystem.IsWindows(),
+                WindowStyle = OperatingSystem.IsWindows() ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -469,12 +469,12 @@ public class EasyTierEntity
         using var cliProcess = new Process();
         cliProcess.StartInfo = new ProcessStartInfo
         {
-            FileName = $"{EasyTierMetadata.EasyTierFilePath}\\easytier-cli.exe",
+            FileName = EasyTierMetadata.CliExecutablePath,
             WorkingDirectory = EasyTierMetadata.EasyTierFilePath,
             Arguments = $"--rpc-portal 127.0.0.1:{_rpcPort} -o json peer",
             ErrorDialog = false,
-            CreateNoWindow = true,
-            WindowStyle = ProcessWindowStyle.Hidden,
+            CreateNoWindow = OperatingSystem.IsWindows(),
+            WindowStyle = OperatingSystem.IsWindows() ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
             UseShellExecute = false,
             RedirectStandardOutput = true,
             RedirectStandardError = true,

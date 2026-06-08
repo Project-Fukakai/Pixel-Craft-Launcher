@@ -219,6 +219,11 @@ _pkginfo.txt
 ClientBin/
 ~$*
 
+# Local environment variables
+.env
+.env.*
+!.env.example
+
 # Local legacy launcher source excluded from this repository
 Plain Craft Launcher 2/
 *~
