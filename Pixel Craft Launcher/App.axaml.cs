@@ -1,12 +1,10 @@
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
-using Avalonia.Data.Core.Plugins;
-using System.Linq;
 using Avalonia.Markup.Xaml;
+using Microsoft.Extensions.DependencyInjection;
 using PCL.Core.App.Essentials;
 using PCL.Core.App.IoC;
-using Pixel_Craft_Launcher.ViewModels;
+using PCL.Core.App.Pixel.Infrastructure;
 using Pixel_Craft_Launcher.Views;
 
 namespace Pixel_Craft_Launcher;
@@ -17,7 +15,8 @@ public partial class App : Application
     {
         AvaloniaXamlLoader.Load(this);
         ApplicationService.Loading = () => this;
-        MainWindowService.Loading = () => new MainWindow();
+        MainWindowService.Loading = () => PixelApplication.Services.GetRequiredService<MainWindow>();
+        PixelApplication.Services.GetRequiredService<PixelHost>().StartAsync().GetAwaiter().GetResult();
         Lifecycle.OnInitialize();
     }
 
@@ -25,7 +24,7 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            MainWindowService.Loading = () => new MainWindow();
+            MainWindowService.Loading = () => PixelApplication.Services.GetRequiredService<MainWindow>();
             Lifecycle.OnLoading();
         }
 

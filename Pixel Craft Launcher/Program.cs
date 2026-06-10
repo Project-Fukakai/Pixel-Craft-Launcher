@@ -1,10 +1,10 @@
 ﻿using Avalonia;
 using System;
-using System.IO;
-using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.MaterialDesign;
-using PCL.Core.App;
+using PCL.Core.App.Pixel.Infrastructure;
+using Serilog;
 
 namespace Pixel_Craft_Launcher;
 
@@ -14,8 +14,19 @@ sealed class Program
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
     // yet and stuff might break.
     [STAThread]
-    public static void Main(string[] args) => BuildAvaloniaApp()
-        .StartWithClassicDesktopLifetime(args);
+    public static void Main(string[] args)
+    {
+        PixelApplication.Initialize(args);
+        try
+        {
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        }
+        finally
+        {
+            PixelApplication.Dispose();
+            Log.CloseAndFlush();
+        }
+    }
 
     // Avalonia configuration, don't remove; also used by visual designer.
     public static AppBuilder BuildAvaloniaApp()
@@ -45,21 +56,8 @@ sealed class Program
 
     private static bool IsHardwareAccelerationDisabled()
     {
-        var localConfigPath = Path.Combine(Paths.Data, "config.v1.yml");
-        if (!File.Exists(localConfigPath))
-            return false;
-
-        try
-        {
-            return File.ReadLines(localConfigPath)
-                .Select(static line => line.Trim())
-                .Any(static line =>
-                    line.StartsWith("SystemDisableHardwareAcceleration:", StringComparison.OrdinalIgnoreCase) &&
-                    line.EndsWith("true", StringComparison.OrdinalIgnoreCase));
-        }
-        catch
-        {
-            return false;
-        }
+        return PixelApplication.Services
+            .GetRequiredService<PixelStartupRenderingService>()
+            .IsHardwareAccelerationDisabled();
     }
 }

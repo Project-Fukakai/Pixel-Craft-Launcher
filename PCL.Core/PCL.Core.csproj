@@ -70,9 +70,14 @@
         <!-- 本地化 -->
         <PackageReference Include="Humanizer.Core.zh-CN" Version="3.0.1" />
         <!-- 日志与遥测 -->
+        <PackageReference Include="MediatR" Version="14.1.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.8" />
         <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.3" />
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.3" />
+        <PackageReference Include="Serilog.Extensions.Logging" Version="10.0.0" />
         <PackageReference Include="Sentry" Version="6.3.1" />
+        <PackageReference Include="Stateless" Version="5.20.1" />
+        <PackageReference Include="System.Reactive" Version="6.1.0" />
         <!-- 身份认证 -->
         <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
         <!-- 验证 -->

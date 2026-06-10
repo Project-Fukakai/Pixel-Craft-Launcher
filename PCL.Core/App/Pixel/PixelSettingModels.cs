@@ -55,7 +55,8 @@ public sealed record PixelSettingDescriptor(
     bool IsEditableCombo = false,
     string? UnitText = null,
     string? DisabledReason = null,
-    string? ValueFormatter = null);
+    string? ValueFormatter = null,
+    string? ActionId = null);
 
 public sealed record PixelSettingGroup(string Title, IReadOnlyList<PixelSettingDescriptor> Settings);
 

@@ -1,3 +1,6 @@
+global using System;
+global using System.Threading;
+global using System.Threading.Tasks;
 global using DependencyObject = Avalonia.AvaloniaObject;
 global using DependencyProperty = Avalonia.AvaloniaProperty;
 global using FrameworkElement = Avalonia.Controls.Control;

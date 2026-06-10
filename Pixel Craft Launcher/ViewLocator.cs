@@ -2,7 +2,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using Pixel_Craft_Launcher.ViewModels;
+using PCL.Core.App.Pixel.ViewModels;
 
 namespace Pixel_Craft_Launcher;
 
@@ -32,6 +32,6 @@ public class ViewLocator : IDataTemplate
 
     public bool Match(object? data)
     {
-        return data is ViewModelBase;
+        return data is PixelViewModelBase;
     }
 }
